@@ -6,7 +6,7 @@
 Author: Nobu
 =end
 
-Version = "1.0.0"
+Version = "1.0.1"
 
 require "./Rv2DataAssembler"
 require "optparse"

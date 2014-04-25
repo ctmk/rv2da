@@ -35,7 +35,13 @@ module JsonUtility
     # @return [Class] objの元々のRubyクラス
     # @param [Hash] obj
     def proper_class(obj)
-      Object.const_get(proper_class_name(obj))
+      nested_const_get(proper_class_name(obj))
+    end
+
+    # ネストした定数を取得する
+    # @return [Object]
+    def nested_const_get(fullname)
+      fullname.split(/::/).inject(Object) {|obj, name| obj.const_get(name) }
     end
     
     # @return [Object] objから元のRubyオブジェクトを生成して返す
