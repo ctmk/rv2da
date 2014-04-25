@@ -5,7 +5,7 @@ an application and ruby scripts which compose and decompose rvdata2 (except Scri
 if you need to handle Scripts.rvdata2, use rv2sa (https://github.com/ctmk/rv2sa).
 
 rvdata2をjsonファイルに変換するツールです。
-Scripts.rvdata2を変換したい場合はrv2sa(https://github.com/ctmk/rv2sa)を使用できます。
+Scripts.rvdata2を変換したい場合は rv2sa (https://github.com/ctmk/rv2sa) を使用できます。
 
 ## 使用方法
 
@@ -23,7 +23,7 @@ Scripts.rvdata2を変換したい場合はrv2sa(https://github.com/ctmk/rv2sa)�
 `exclude`: 処理をしない条件を書いたファイルを指定します。（デフォルトではScriptsのみが指定されています。）
 ファイルに記載する条件には、正規表現を利用できます。
 
-### json -> rvdata2
+### json -> rvdata2 の変換
 
 `rv2da.exe -c Path/To/Json/Dir -p Path/To/Output/Dir -e exclude`
 
@@ -47,7 +47,7 @@ RPGツクールVX Ace をインスールした場所にある`RPGVXAce.chm`を�
 ### .chm ファイルの分解
 
 CLIでrv2daの`source/`に移動し、`hh.exe -decompile decompiled RPGVXAce.chm` を実行してください。
-`source/decompiled.`に.chmを分解したファイルが生成されます。
+`source/decompiled`に.chmを分解したファイルが生成されます。
 
 ### 定義ファイルの生成
 

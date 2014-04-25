@@ -89,7 +89,7 @@ def main
   excludes =
     options.exclude &&
     open(options.exclude) {|f|
-      excludes = f.readlines.collect {|line| line.chomp }
+      f.readlines.collect {|line| line.chomp }
     } || []
 
   # [Symbol]
