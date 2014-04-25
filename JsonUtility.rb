@@ -66,14 +66,16 @@ module JsonUtility
     
     # JSONから読み取ったオブジェクトを、可能なものは元のRubyオブジェクトに変換して返す
     # @param [Object] obj
+    # @param [Proc] hash_converted
     # @return [Object]
-    def json_to_proper_object(obj)
+    def json_to_proper_object(obj, hash_converter = nil)
       case obj
       when json_object?
         json_object_to_proper_object(obj)
       when Hash
+        key = hash_converter ? obj.keys.collect {|item| item.send(hash_converter) } : obj.keys
         Hash[
-          obj.keys.zip(obj.values.collect {|item| proper_object(item)})
+          key.zip(obj.values.collect {|item| proper_object(item)})
         ]
       when Array
         obj.collect do|item|
@@ -103,7 +105,7 @@ module JsonUtility
   # @param [JsonObject] obj
   def from_json(obj)
     obj.each do|key, value|
-      instance_variable_set_converting_hash_key(key, JsonUtility::json_to_proper_object(value))
+      instance_variable_set(key, JsonUtility::json_to_proper_object(value, hash_key_converter(key)))
     end
   end
   
@@ -113,16 +115,6 @@ module JsonUtility
   # @return [NilClass] if 変換しない場合
   def hash_key_converter(name)
     nil
-  end
-
-  # Hashのキーを型変換して値を設定する
-  def instance_variable_set_converting_hash_key(name, value)
-    conv = value.is_a?(Hash) && hash_key_converter(name)
-    if conv
-      instance_variable_set(name, Hash[value.keys.collect {|item| item.send(conv) }.zip(value.values)])
-    else
-      instance_variable_set(name, value)
-    end
   end
 
   # Json形式に変換する
