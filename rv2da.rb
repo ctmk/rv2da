@@ -8,7 +8,7 @@ Author: Nobu
 
 Version = "1.0.1"
 
-require "./Rv2DataAssembler"
+require_relative "./Rv2DataAssembler"
 require "optparse"
 
 Options = Struct.new("Options", :mode, :input, :output, :exclude, )

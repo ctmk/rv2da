@@ -1,4 +1,4 @@
-require "./JsonUtility"
+require_relative "../JsonUtility"
 
 class Color
   def initialize(red, green, blue, alpha)

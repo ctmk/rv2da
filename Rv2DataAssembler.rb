@@ -5,8 +5,8 @@ Author: Nobu
 
 require "json"
 require "find"
-require "./JsonUtility"
-require "./rpg"
+require_relative "./JsonUtility"
+require_relative "./rpg"
 
 module Rv2DataAssembler
 

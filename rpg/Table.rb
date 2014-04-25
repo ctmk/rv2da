@@ -1,4 +1,4 @@
-require "./JsonUtility"
+require_relative "../JsonUtility"
 
 class Table
   def initialize(data)

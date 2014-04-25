@@ -1,4 +1,4 @@
-require "./JsonUtility"
+require_relative "../JsonUtility"
 
 class Tone
   def initialize(red, green, blue, gray = nil)

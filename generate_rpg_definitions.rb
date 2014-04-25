@@ -45,9 +45,9 @@ class RpgDefinitionGenerator
     def make_rv2da_code(code)
       klass = (code.match(/class[\s]+([\w]+(::[\w]+)*)/) || [])[1]
       base = (code.match(/class[\s]+([\w]+(::[\w]+)*)[\s]*<[\s]*([\w]+(::[\w]+)*)/) || [])[3]
-      depend = (base && "require \"./rpg/#{base.downcase.gsub(/::/, '_')}.rb\"") || ""
+      depend = (base && "require_relative \"./#{base.downcase.gsub(/::/, '_')}.rb\"") || ""
 <<CODE
-require "./JsonUtility.rb"
+require_relative "../JsonUtility.rb"
 #{depend}
 
 module RGSS3
