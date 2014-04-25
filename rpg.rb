@@ -58,3 +58,28 @@ class RPG::Map
     end
   end
 end
+
+module RPG
+
+  module DefaultRootObject
+    def self.hash_key_converter
+      nil
+    end
+  end
+  
+  module MapInfosRootObject
+    def self.hash_key_converter
+      :to_i
+    end
+  end
+
+  def self.RootObject(root)
+    case root
+    when "MapInfos"
+      MapInfosRootObject
+    else
+      DefaultRootObject
+    end
+  end
+
+end

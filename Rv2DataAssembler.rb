@@ -99,7 +99,7 @@ class Composition
       matched = $1
       return unless excludes.find {|pattern| matched.match(Regexp.compile(pattern)) }.nil?
       
-      obj = JsonUtility::json_to_proper_object(load_json(filename))
+      obj = JsonUtility::json_to_proper_object(load_json(filename), RPG::RootObject(matched)::hash_key_converter)
       save_rvdata2(obj, "#{path_out}/#{matched}.rvdata2")
     end
 
