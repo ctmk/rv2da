@@ -118,11 +118,13 @@ module JsonUtility
     ]).to_json(*args)
   end
   
-  # @return [Boolean] 同値チェックに成功するか
+  # 同値チェック
+  # @return [Boolean] 全てのインスタンス変数が同じ値か
   def ==(obj)
-    instance_variables.find do|key|
-      instance_variable_get(key) != obj.instance_variable_get(key)
-    end.nil?
+    instance_variables == obj.instance_variables &&
+    instance_variables.all? {|key|
+      instance_variable_get(key) == obj.instance_variable_get(key)
+    }
   end
   
 end
