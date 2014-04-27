@@ -4,8 +4,12 @@ class Table
   def initialize(data)
     @dimension, @xsize, @ysize, @zsize, @num_elements, *elements = *data
 
-    @elements = ([@xsize||1, @ysize||1].slice(0, @dimension-1) || []).inject(elements) do|memo, size|
-      memo.each_slice(size > 0 ? size : 1).to_a
+    xsize = [@xsize, 1].compact.max
+    ysize = [@ysize, 1].compact.max
+    dimension = [@dimension, 1].compact.max
+    
+    @elements = [xsize, ysize].take(dimension - 1).inject(elements) do|memo, size|
+      memo.each_slice(size).to_a
     end
   end
 
