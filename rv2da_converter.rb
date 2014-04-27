@@ -4,7 +4,7 @@
 
 require "json"
 require "find"
-require_relative "./JsonUtility"
+require_relative "./rv2da_jsonobject"
 require_relative "./rpg"
 
 module Rv2da
@@ -122,7 +122,7 @@ class Rv2da::Converter::Composition
     private
     
     def inner_convert(filename, name)
-      JsonUtility::json_to_proper_object(load_json(filename), RPG::RootObject(name)::hash_key_converter)
+      Rv2da::JsonObject::json_to_proper_object(load_json(filename), RPG::RootObject(name)::hash_key_converter)
     end
 
     # JSONファイルを読み込む

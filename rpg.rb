@@ -1,9 +1,9 @@
 module RPG; end
 module RGSS3; module RPG; end; end
 
-require_relative "./rpg/Table"
-require_relative "./rpg/Tone"
-require_relative "./rpg/Color"
+require_relative "./rpg/table"
+require_relative "./rpg/tone"
+require_relative "./rpg/color"
 require_relative "./rpg/rpg_actor"
 require_relative "./rpg/rpg_animation"
 require_relative "./rpg/rpg_animation_frame"

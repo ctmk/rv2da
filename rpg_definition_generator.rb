@@ -47,7 +47,7 @@ class RpgDefinitionGenerator
       base = (code.match(/class[\s]+([\w]+(::[\w]+)*)[\s]*<[\s]*([\w]+(::[\w]+)*)/) || [])[3]
       depend = (base && "require_relative \"./#{base.downcase.gsub(/::/, '_')}.rb\"") || ""
 <<CODE
-require_relative "../JsonUtility.rb"
+require_relative "../rv2da_jsonobject"
 #{depend}
 
 module RGSS3
@@ -55,8 +55,8 @@ module RGSS3
 end
 
 class #{klass} < RGSS3::#{klass}
-  alias initialize_org_json_utility initialize
-  include JsonUtility
+  alias initialize_org_json_object initialize
+  include Rv2da::JsonObject
   def initialize(*args); initialize_from_json_object(*args); end
 end
 CODE
