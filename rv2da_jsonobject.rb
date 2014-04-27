@@ -113,25 +113,32 @@ module Rv2da::JsonObject
   
 end
 
-class Object
-  def to_proper_object(hash_converter = nil, nest_level = 0)
-    self
-  end
-end
+module Rv2da::JsonObject
 
-class Array
-  def to_proper_object(hash_converter = nil, nest_level = 0)
-    collect do|item|
-      Rv2da::JsonObject.json_to_proper_object(item, hash_converter, nest_level+1)
+  module ObjectExtension
+    def to_proper_object(hash_converter = nil, nest_level = 0)
+      self
     end
   end
-end
-
-class Hash
-  def to_proper_object(hash_converter = nil, nest_level = 0)
-    key = hash_converter.call(nest_level, keys) rescue keys
-    Hash[
-      key.zip(values.collect {|item| Rv2da::JsonObject.json_to_proper_object(item, hash_converter, nest_level+1)})
-    ]
+  Object.send(:include, ObjectExtension)
+  
+  module ArrayExtension
+    def to_proper_object(hash_converter = nil, nest_level = 0)
+      collect do|item|
+        Rv2da::JsonObject.json_to_proper_object(item, hash_converter, nest_level+1)
+      end
+    end
   end
+  Array.send(:include, ArrayExtension)
+  
+  module HashExtension
+    def to_proper_object(hash_converter = nil, nest_level = 0)
+      key = hash_converter.call(nest_level, keys) rescue keys
+      Hash[
+        key.zip(values.collect {|item| Rv2da::JsonObject.json_to_proper_object(item, hash_converter, nest_level+1)})
+      ]
+    end
+  end
+  Hash.send(:include, HashExtension)
+
 end
