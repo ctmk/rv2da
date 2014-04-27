@@ -1,6 +1,6 @@
 require_relative "../rv2da_jsonobject"
 
-class Table
+class RGSS3::Table
   def initialize(data)
     @dimension, @xsize, @ysize, @zsize, @num_elements, *elements = *data
 
@@ -20,8 +20,8 @@ class Table
   def self._load(obj)
     Table.new(obj.unpack("V5v*"))
   end
+end
 
-  alias initialize_org_json_object initialize
+class Table < RGSS3::Table
   include Rv2da::JsonObject
-  def initialize(*args); initialize_from_json_object(*args); end
 end

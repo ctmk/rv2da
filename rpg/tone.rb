@@ -1,6 +1,6 @@
 require_relative "../rv2da_jsonobject"
 
-class Tone
+class RGSS3::Tone
   def initialize(red, green, blue, gray = nil)
     @red = red
     @green = green
@@ -15,8 +15,8 @@ class Tone
   def self._load(obj)
     Tone.new(*obj.unpack("E4"))
   end
+end
 
-  alias initialize_org_json_object initialize
+class Tone < RGSS3::Tone
   include Rv2da::JsonObject
-  def initialize(*args); initialize_from_json_object(*args); end
 end

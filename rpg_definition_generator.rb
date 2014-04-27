@@ -55,9 +55,7 @@ module RGSS3
 end
 
 class #{klass} < RGSS3::#{klass}
-  alias initialize_org_json_object initialize
   include Rv2da::JsonObject
-  def initialize(*args); initialize_from_json_object(*args); end
 end
 CODE
     end
