@@ -6,96 +6,129 @@
 Author: Nobu
 =end
 
-Version = "1.1.0"
+Version = "1.2.0"
 
 require_relative "./Rv2DataAssembler"
 require "optparse"
 
-Options = Struct.new("Options", :mode, :input, :output, :exclude, )
+module Rv2da
+  Options = Struct.new("Options", :mode, :input, :output, :exclude, )
+  class InvalidArgument < StandardError; end
 
-# コマンドラインパラメータを読み込む
-# @return [Options]
-def parse_arguments
-  options = Options.new(nil)
+  # @parma [Array] argv
+  def self.run(argv, stdout = $stdout)
+    options = parse_arguments(argv)
   
-  optparser = OptionParser.new
+    # [Class]
+    converter =
+      case options.mode
+      when :compose
+        Composition
+      when :decompose
+        Decomposition
+      end
   
-  optparser.on("-c", "--compose FILE", "Compose: specify a source file or directory path") do|val|
-    options.input = val
-    options.mode = :compose
+    # [Array<String>]
+    excludes =
+      options.exclude &&
+      open(options.exclude) {|f|
+        f.readlines.collect {|line| line.chomp }
+      } || []
+  
+    # convert
+    if File.directory?(options.input)
+      converter.convert_all(options.input, options.output, excludes)
+  
+    elsif obj = converter.convert(options.input)
+      unless options.output
+        stdout.write obj
+      else
+        case
+        when File.file?(options.output)
+          converter.save(option.output, obj)
+        when File.directory?(options.output)
+          name = File.basename(options.input, ".*")
+          converter.save("#{options.output}/#{name}#{converter.extension}", obj)
+        end
+      end
+    end
   end
-  
-  optparser.on("-d", "--decompose FILE", "Decompose: specify a source file or directory path") do|val|
-    options.input = val
-    options.mode = :decompose
-  end
-  
-  optparser.on("-o", "--output DIR", "destination directory") do|val|
-    options.output = val
-  end
-  
-  optparser.on("-e", "--excludes FILE", "exclude file") do|val|
-    options.exclude = val
-  end
-  
-  # parse and validate
-  begin
-    optparser.parse(ARGV)
 
+  # @return [Options]
+  # @parma [Array] argv
+  def self.parse_arguments(argv)
+    options = Options.new(nil)
+    optparser = OptionParser.new
+
+    def optparser.error(msg = nil)
+      warn msg if msg
+      warn help()
+      raise InvalidArgument
+    end
+    
+    define_options(optparser, options)
+    
+    begin
+      optparser.parse(argv)
+    rescue OptionParser::ParseError => err
+      optparser.error err.message
+    end
+
+    validate_options(optparser, options)
+
+    options
+  end
+  
+  def self.define_options(optparser, options)
+    optparser.on("-c", "--compose=FILE", "Compose: specify a source file or directory path") do|val|
+      options.input = val
+      options.mode = :compose
+    end
+    
+    optparser.on("-d", "--decompose=FILE", "Decompose: specify a source file or directory path") do|val|
+      options.input = val
+      options.mode = :decompose
+    end
+    
+    optparser.on("-o", "--output=DIR|FILE", "destination file or directory") do|val|
+      options.output = val
+    end
+    
+    optparser.on("-e", "--excludes=FILE", "exclude list") do|val|
+      options.exclude = val
+    end
+  end
+  
+  def self.validate_options(optparser, options)
     case options.mode
     when :compose, :decompose
     else
-      STDERR.puts "Error!! specify -c or -d"
-      raise
-    end
-    
-    unless options.output && File.directory?(options.output)
-      STDERR.puts "Error!! #{options.output} is not found or is not directory"
-      raise
+      optparser.error "specify -c or -d"
     end
     
     unless options.input && File.exist?(options.input)
-      STDERR.puts "Error!! #{options.input} is not found"
-      raise
+      optparser.error %Q("#{options.input}" is not found)
     end
     
-    if options.exclude && File.exist?(options.exclude).!
-      STDERR.puts "Error!! #{options.exclude} is not file"
-      raise
+    if File.directory?(options.input) && (!options.output ||  !File.directory?(options.output))
+      optparser.error %Q("#{options.output}" is not a directory, but input is a directory)
     end
-
-  rescue
-    # show usage
-    optparser.parse("--help")
+    
+    if options.exclude && not(File.file?(options.exclude))
+      optparser.error %Q("#{options.exclude}" is not a file)
+    end
   end
   
-  options
+
 end
 
-# Entry point
-def main
-  options = parse_arguments
-
-  # [Module]
-  mod =
-    case options.mode
-    when :compose
-      Composition
-    when :decompose
-      Decomposition
-    end
-
-  # [Array<String>]
-  excludes =
-    options.exclude &&
-    open(options.exclude) {|f|
-      f.readlines.collect {|line| line.chomp }
-    } || []
-
-  # [Symbol]
-  action = File.directory?(options.input) ? :do_all : :do
-
-  # compose / decompose
-  mod.send(action, options.input, options.output, excludes)  if mod
+begin
+  Rv2da.run(ARGV)
+rescue Rv2da::InvalidArgument
+  # The command-line arguments are invalid
+  exit 1
+rescue Rv2DataAssembler::InvalidFormatedFile => err
+  # Failed to convert because the source file is invalid format
+  warn err.message
+  exit 1
 end
-main

@@ -9,40 +9,50 @@ require_relative "./JsonUtility"
 require_relative "./rpg"
 
 module Rv2DataAssembler
+  class InvalidFormatedFile < StandardError; end
 
-  # rvdata2を読み込む
-  # @return [Object]
-  # @param [String] filename
-  def load_rvdata2(filename)
-    File.open(filename, "rb") {|f|
-      Marshal.load(f)
-    }
+  # @param [String] dirname
+  # @param [String] outout
+  # @param [Array<String>] excludes
+  def convert_all(dirname, output, excludes = [])
+    convert_all_files_in_directory(dirname, output, excludes)
   end
   
-  # JSONファイルを読み込む
-  # @return [Object]
-  # @param [String] filename
-  def load_json(filename)
-    JSON.restore(File.read(filename, :encoding => Encoding::UTF_8))
+  # @param [String] dirname
+  # @param [String] outout
+  # @param [Array<String>] excludes
+  def convert_all_files_in_directory(dirname, path_out, excludes = [])
+    Find.find(dirname) do|filename|
+      next unless obj = convert(filename, target_extension, excludes)
+
+      name = File.basename(filename, ".*")
+      save("#{path_out}/#{name}#{extension}", obj)
+    end
   end
-  
-  # rvdata2として出力する
+
+  # @param [String] filename
+  # @param [String] target_ext
+  # @param [Array<String>] excludes
+  def convert(filename, target_ext = "", excludes = [])
+    return unless matched = /([^\/]+)#{target_ext}$/.match(filename)
+    return if excludes.any? {|pattern| matched[1].match(Regexp.compile(pattern)) }
+    inner_convert(filename, matched[1])
+  end
+
+  # @param [String] filename
   # @param [Object] obj
-  # @param [String] filename
-  def save_rvdata2(obj, filename)
-    File.open(filename, "wb") {|f|
-      Marshal.dump(obj, f)
-    }
-  end
+  def save(filename, obj); end
   
-  # JSONファイルとして出力する
-  # @param [Object] obj
-  # @param [String] filename
-  # @note JSONファイルとして有効な形に変換されて出力される
-  def save_json(obj, filename)
-    File.write(filename, JSON.pretty_generate(obj)) if obj
-  end
+  # @return [String]
+  def extension; end
   
+  # @return [String]
+  def target_extension; end
+  
+  # @param [String] filename
+  # @param [String] name
+  def inner_convert(filename, name); end
+
 end
 
 # rvdata2を分解する
@@ -50,28 +60,37 @@ class Decomposition
   extend Rv2DataAssembler 
   class << self
     
-    def do_all(dirname, output, excludes = [])
-      decompose_all_files_in_directory(dirname, output, excludes)
+    def extension
+      ".json"
     end
     
-    def do(filename, output, excludes = [])
-      decompose(filename, output, excludes)
+    def target_extension
+      ".rvdata2"
     end
-  
-    def decompose_all_files_in_directory(dirname, path_out, excludes = [])
-      Find.find(dirname) do |filename|
-        decompose(filename, path_out, excludes)
+    
+    def save(filename, obj)
+      File.write(filename, obj)
+    end
+    
+    private
+    
+    def inner_convert(filename, name)
+      JSON.pretty_generate(load_rvdata2(filename))
+    end
+
+    # @return [Object]
+    # @param [String] filename
+    # @raise [InvalidFormatedFile]
+    def load_rvdata2(filename)
+      begin
+        File.open(filename, "rb") {|f|
+          Marshal.load(f)
+        }
+      rescue TypeError
+        raise InvalidFormatedFile, %Q(Failed to load rvdata2 from "#{filename}")
       end
     end
   
-    def decompose(filename, path_out, excludes = [])
-      return unless filename =~ /([\w]+)\.rvdata2/
-      matched = $1
-      return unless excludes.find {|pattern| matched.match(Regexp.compile(pattern)) }.nil?
-
-      save_json(load_rvdata2(filename), "#{path_out}/#{matched}.json")
-    end
-
   end
 end
 
@@ -80,27 +99,41 @@ class Composition
   extend Rv2DataAssembler
   class << self
     
-    def do_all(dirname, output, excludes = [])
-      compose_all_files_in_directory(dirname, output, excludes)
+    def extension
+      ".rvdata2"
     end
     
-    def do(filename, output, excludes = [])
-      compose(filename, output, excludes)
+    def target_extension
+      ".json"
     end
-
-    def compose_all_files_in_directory(dirname, path_out, excludes = [])
-      Find.find(dirname) do |filename|
-        compose(filename, path_out, excludes)
+    
+    # @raise [InvalidFormatedFile]
+    def save(filename, obj)
+      begin
+        File.open(filename, "wb") {|f|
+          Marshal.dump(obj, f)
+        }
+      rescue TypeError
+        raise InvalidFormatedFile, %Q(Failed to save rvdata2 to "#{filename}")
       end
     end
     
-    def compose(filename, path_out, excludes = [])
-      return unless filename =~ /([\w]+)\.json/
-      matched = $1
-      return unless excludes.find {|pattern| matched.match(Regexp.compile(pattern)) }.nil?
-      
-      obj = JsonUtility::json_to_proper_object(load_json(filename), RPG::RootObject(matched)::hash_key_converter)
-      save_rvdata2(obj, "#{path_out}/#{matched}.rvdata2")
+    private
+    
+    def inner_convert(filename, name)
+      JsonUtility::json_to_proper_object(load_json(filename), RPG::RootObject(name)::hash_key_converter)
+    end
+
+    # JSONファイルを読み込む
+    # @return [Object]
+    # @param [String] filename
+    # @raise [InvalidFormatedFile]
+    def load_json(filename)
+      begin
+        JSON.restore(File.read(filename, :encoding => Encoding::UTF_8))
+      rescue JSON::ParserError
+        raise InvalidFormatedFile, %Q(Failed to load json from "#{filename}")
+      end
     end
 
   end
