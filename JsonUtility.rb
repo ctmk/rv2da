@@ -51,19 +51,6 @@ module JsonUtility
       proper_class(obj).new(json_object(obj))
     end
     
-    # JsonObjectに変換可能なobjを渡した場合は元のRubyオブジェクトを生成して返し,
-    # そうでなければobjをそのまま返す.
-    # @return [Object]
-    # @param [Hash, Object] obj
-    def proper_object(obj)
-      case obj
-      when json_object?
-        json_object_to_proper_object(obj)
-      else
-        obj
-      end
-    end
-    
     # JSONから読み取ったオブジェクトを、可能なものは元のRubyオブジェクトに変換して返す
     # @param [Object] obj
     # @param [Proc] hash_converted
@@ -73,7 +60,7 @@ module JsonUtility
       when json_object?
         json_object_to_proper_object(obj)
       when Hash
-        key = hash_converter ? obj.keys.collect {|item| item.send(hash_converter) } : obj.keys
+        key = hash_converter.call(nest_level, obj.keys) rescue obj.keys
         Hash[
           key.zip(obj.values.collect {|item| json_to_proper_object(item, hash_converter, nest_level+1)})
         ]
@@ -90,11 +77,13 @@ module JsonUtility
 end
 
 module JsonUtility
+
   # 一番目の引数にJsonObjectが指定されていればJsonObjectを使って初期化し,
   # そうでなければ通常のコンストラクタを呼び出す.
   # @note alias initialize_org_json_utility initialize してから呼び出す
   def initialize_from_json_object(*args)
-    if args[0].is_a?(JsonObject)
+    case args[0]
+    when JsonObject
       from_json(args[0])
     else
       initialize_org_json_utility(*args)
@@ -102,22 +91,25 @@ module JsonUtility
   end
   
   # JsonObjectを使って初期化する
-  # @param [JsonObject] obj
+  # @param [Object] self
   def from_json(obj)
     obj.each do|key, value|
       instance_variable_set(key, JsonUtility::json_to_proper_object(value, hash_key_converter(key)))
     end
+    self
   end
   
   # Hashのキーを型変換しなければいけないものと変換方法
-  # @param [String] Hashの変数名
-  # @return [Symbol] 変換方法(メソッド名) if 変換する場合
-  # @return [NilClass] if 変換しない場合
+  # JsonではHashのキーを文字列型でしか持てないので,
+  # 文字列以外のキーが必要な場合は、変換方法を実装する.
+  # @param [String] name Hashの変数名
+  # @return [Proc] nest_level, keysを受け取って変換後のkeysを返すProc
   def hash_key_converter(name)
-    nil
+    ->(nest_level, keys) { keys }
   end
 
   # Json形式に変換する
+  # メンバ変数名/値をkey/valueとしてもつObjectとして扱う
   def to_json(*args)
     { RGSS3_CLASS => self.class.to_s }.merge(Hash[
       instance_variables.collect {|name|

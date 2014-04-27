@@ -54,7 +54,11 @@ class RPG::Map
   def hash_key_converter(name)
     case name.intern
     when :@events
-      :to_i
+      ->(nest_level, keys) {
+        keys.collect {|key| key.to_i }
+      }
+    else
+      super
     end
   end
 end
@@ -69,7 +73,9 @@ module RPG
   
   module MapInfosRootObject
     def self.hash_key_converter
-      :to_i
+      ->(nest_level, keys) {
+        keys.collect {|key| key.to_i }
+      }
     end
   end
 
