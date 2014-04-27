@@ -22,7 +22,7 @@ module JsonUtility
     
     # @return [Proc] JsonObjectに変換可能かをチェックするProc
     def json_object?
-      ->(obj) { obj.is_a?(Hash) && obj.has_key?(RGSS3_CLASS) }
+      ->(obj) { obj.has_key?(RGSS3_CLASS) rescue false }
     end
     
     # return [String] JsonObjectから元に戻す対象のクラス名
