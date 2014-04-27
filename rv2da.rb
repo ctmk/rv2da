@@ -2,13 +2,12 @@
 # coding: utf-8
 
 =begin
-データ系の.rvdata2ファイルとJSONファイルの相互変換を行う
-Author: Nobu
+  データ系の.rvdata2ファイルとJSONファイルの相互変換を行う.
 =end
 
 Version = "1.2.0"
 
-require_relative "./Rv2DataAssembler"
+require_relative "./rv2da_converter"
 require "optparse"
 
 module Rv2da
@@ -23,9 +22,9 @@ module Rv2da
     converter =
       case options.mode
       when :compose
-        Composition
+        Converter::Composition
       when :decompose
-        Decomposition
+        Converter::Decomposition
       end
   
     # [Array<String>]
@@ -127,7 +126,7 @@ begin
 rescue Rv2da::InvalidArgument
   # The command-line arguments are invalid
   exit 1
-rescue Rv2DataAssembler::InvalidFormatedFile => err
+rescue Rv2Da::Converter::InvalidFormatedFile => err
   # Failed to convert because the source file is invalid format
   warn err.message
   exit 1

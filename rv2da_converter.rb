@@ -1,6 +1,5 @@
 =begin
-
-Author: Nobu
+  convert to json or rvdata2
 =end
 
 require "json"
@@ -8,56 +7,58 @@ require "find"
 require_relative "./JsonUtility"
 require_relative "./rpg"
 
-module Rv2DataAssembler
-  class InvalidFormatedFile < StandardError; end
-
-  # @param [String] dirname
-  # @param [String] outout
-  # @param [Array<String>] excludes
-  def convert_all(dirname, output, excludes = [])
-    convert_all_files_in_directory(dirname, output, excludes)
-  end
+module Rv2da
+  module Converter
+    class InvalidFormatedFile < StandardError; end
   
-  # @param [String] dirname
-  # @param [String] outout
-  # @param [Array<String>] excludes
-  def convert_all_files_in_directory(dirname, path_out, excludes = [])
-    Find.find(dirname) do|filename|
-      next unless obj = convert(filename, target_extension, excludes)
-
-      name = File.basename(filename, ".*")
-      save("#{path_out}/#{name}#{extension}", obj)
+    # @param [String] dirname
+    # @param [String] outout
+    # @param [Array<String>] excludes
+    def convert_all(dirname, output, excludes = [])
+      convert_all_files_in_directory(dirname, output, excludes)
     end
+    
+    # @param [String] dirname
+    # @param [String] outout
+    # @param [Array<String>] excludes
+    def convert_all_files_in_directory(dirname, path_out, excludes = [])
+      Find.find(dirname) do|filename|
+        next unless obj = convert(filename, target_extension, excludes)
+  
+        name = File.basename(filename, ".*")
+        save("#{path_out}/#{name}#{extension}", obj)
+      end
+    end
+  
+    # @param [String] filename
+    # @param [String] target_ext
+    # @param [Array<String>] excludes
+    def convert(filename, target_ext = "", excludes = [])
+      return unless matched = /([^\/]+)#{target_ext}$/.match(filename)
+      return if excludes.any? {|pattern| matched[1].match(Regexp.compile(pattern)) }
+      inner_convert(filename, matched[1])
+    end
+  
+    # @param [String] filename
+    # @param [Object] obj
+    def save(filename, obj); end
+    
+    # @return [String]
+    def extension; end
+    
+    # @return [String]
+    def target_extension; end
+    
+    # @param [String] filename
+    # @param [String] name
+    def inner_convert(filename, name); end
+
   end
-
-  # @param [String] filename
-  # @param [String] target_ext
-  # @param [Array<String>] excludes
-  def convert(filename, target_ext = "", excludes = [])
-    return unless matched = /([^\/]+)#{target_ext}$/.match(filename)
-    return if excludes.any? {|pattern| matched[1].match(Regexp.compile(pattern)) }
-    inner_convert(filename, matched[1])
-  end
-
-  # @param [String] filename
-  # @param [Object] obj
-  def save(filename, obj); end
-  
-  # @return [String]
-  def extension; end
-  
-  # @return [String]
-  def target_extension; end
-  
-  # @param [String] filename
-  # @param [String] name
-  def inner_convert(filename, name); end
-
 end
 
 # rvdata2を分解する
-class Decomposition
-  extend Rv2DataAssembler 
+class Rv2da::Converter::Decomposition
+  extend Rv2da::Converter 
   class << self
     
     def extension
@@ -95,8 +96,8 @@ class Decomposition
 end
 
 # rvdata2に変換する
-class Composition
-  extend Rv2DataAssembler
+class Rv2da::Converter::Composition
+  extend Rv2da::Converter 
   class << self
     
     def extension

@@ -120,11 +120,11 @@ class Rv2da::Test < Test::Unit::TestCase
   end
   
   def test_converting_invalid_files
-    assert_raise(Rv2DataAssembler::InvalidFormatedFile) {
+    assert_raise(Rv2da::Converter::InvalidFormatedFile) {
       Rv2da.run(['-d', 'testdata/excludes', '-o', 'testdata/test.json'])
     }
 
-    assert_raise(Rv2DataAssembler::InvalidFormatedFile) {
+    assert_raise(Rv2da::Converter::InvalidFormatedFile) {
       Rv2da.run(['-c', 'testdata/excludes', '-o', 'testdata/test.rvdata2'])
     }
   end
