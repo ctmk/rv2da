@@ -126,7 +126,7 @@ begin
 rescue Rv2da::InvalidArgument
   # The command-line arguments are invalid
   exit 1
-rescue Rv2Da::Converter::InvalidFormatedFile => err
+rescue Rv2da::Converter::InvalidFormatedFile => err
   # Failed to convert because the source file is invalid format
   warn err.message
   exit 1
