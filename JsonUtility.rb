@@ -68,18 +68,18 @@ module JsonUtility
     # @param [Object] obj
     # @param [Proc] hash_converted
     # @return [Object]
-    def json_to_proper_object(obj, hash_converter = nil)
+    def json_to_proper_object(obj, hash_converter = nil, nest_level = 0)
       case obj
       when json_object?
         json_object_to_proper_object(obj)
       when Hash
         key = hash_converter ? obj.keys.collect {|item| item.send(hash_converter) } : obj.keys
         Hash[
-          key.zip(obj.values.collect {|item| proper_object(item)})
+          key.zip(obj.values.collect {|item| json_to_proper_object(item, hash_converter, nest_level+1)})
         ]
       when Array
         obj.collect do|item|
-          proper_object(item)
+          json_to_proper_object(item, hash_converter, nest_level+1)
         end
       else
         obj
