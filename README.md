@@ -23,6 +23,8 @@ Scripts.rvdata2を変換したい場合は rv2sa (https://github.com/ctmk/rv2sa)
 `exclude`: 処理をしない条件を書いたファイルを指定します。（デフォルトではScriptsのみが指定されています。）
 ファイルに記載する条件には、正規表現を利用できます。
 
+※ System.rvdata2 を .json に変換する際、`@version_id`は常に`0`に設定されます。
+
 ### json -> rvdata2 の変換
 
 `rv2da.exe -c Path/To/Json/Dir -p Path/To/Output/Dir -e exclude`
