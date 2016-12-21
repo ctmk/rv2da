@@ -86,6 +86,11 @@ class Rv2da::Converter::Decomposition
       begin
         File.open(filename, "rb") {|f|
           Marshal.load(f)
+        }.tap {|d|
+          case d
+          when RPG::System
+            d.version_id = 0
+          end
         }
       rescue TypeError
         raise InvalidFormatedFile, %Q(Failed to load rvdata2 from "#{filename}")
