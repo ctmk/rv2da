@@ -5,7 +5,7 @@
   データ系の.rvdata2ファイルとJSONファイルの相互変換を行う.
 =end
 
-Version = "1.2.0"
+Version = "1.2.1"
 
 require_relative "./rv2da_converter"
 require "optparse"
