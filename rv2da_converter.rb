@@ -70,7 +70,7 @@ class Rv2da::Converter::Decomposition
     end
     
     def save(filename, obj)
-      File.write(filename, obj)
+      File.open(filename, "w") {|f| f.write obj }
     end
     
     private
