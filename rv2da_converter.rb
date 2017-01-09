@@ -90,6 +90,7 @@ class Rv2da::Converter::Decomposition
           case d
           when RPG::System
             d.version_id = 0
+            d.edit_map_id = 1
           end
         }
       rescue TypeError
