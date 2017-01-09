@@ -64,7 +64,7 @@ CLIでrv2daの`source/`に移動し、`hh.exe -decompile decompiled RPGVXAce.chm
 
 ## rv2da
 
-rv2daのrubyスクリプトは[NYSL](https://github.com/ctmk/rv2da/blob/master/README.md)で公開されています。
+rv2daのrubyスクリプトは[NYSL](https://github.com/ctmk/rv2da/blob/master/LICENSE)で公開されています。
 
 ## rv2da.exe
 
