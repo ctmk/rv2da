@@ -44,7 +44,7 @@ module Rv2da
       else
         case
         when File.file?(options.output)
-          converter.save(option.output, obj)
+          converter.save(options.output, obj)
         when File.directory?(options.output)
           name = File.basename(options.input, ".*")
           converter.save("#{options.output}/#{name}#{converter.extension}", obj)
